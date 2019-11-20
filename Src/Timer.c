@@ -5,9 +5,14 @@
 
 #define MAX_POS (10.0)
 #define MIN_POS (2.0)
+uint32_t DutyCycle[2] = {0,0};
 char buf[100];
 
 int TIM3_TIF = 0;
+
+uint32_t getDutyCycle(uint8_t servo){
+  return DutyCycle[servo];
+}
 
 int getTIM3_TIF(){
   return TIM3_TIF;
@@ -32,9 +37,11 @@ void setDuty(int channel, float duty){
 	if(channel == 0){
 		//set duty cycle
 		TIM2->CCR1 = 20000 * (dutyCycle / 100.0);
+    DutyCycle[0] = 20000 * (dutyCycle / 100.0);
 	}
   if(channel == 1){
     TIM2->CCR2 = 20000 * (dutyCycle / 100.0);
+    DutyCycle[1] = 20000 * (dutyCycle / 100.0);
   }
 }
 

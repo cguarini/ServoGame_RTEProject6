@@ -57,6 +57,9 @@
 #include "usart.h"
 #include "gpio.h"
 #include "servo.h"
+#include "Timer.h"
+#include "GPIOINP.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -129,6 +132,10 @@ int main(void)
   MX_RNG_Init();
   MX_TIM5_Init();
   MX_SPI2_Init();
+  initTIM2();
+  initTIM3();
+  initGPIOA();
+
   /* USER CODE BEGIN 2 */
 
   gyro_task_init();

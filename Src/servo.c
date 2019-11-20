@@ -147,17 +147,47 @@ void servo_task(void *parameters){
 	servo_pos = servo_pos % 6;
 	USART_Printf("Servo is now at position %d\r\n", servo_pos);
 	moveServo(p->id, servo_pos);
+  uint32_t roundStartTime = xTaskGetTickCount();
 	
 	for(;;){
+    
+    //Get Duty Cycle of each servo
+    uint32_t servoDutyCycle = getDutyCycle(0);
+    uint32_t playerDutyCycle = getDutyCycle(1);
+    
+    float dutyCycleFactor = (float) servoDutyCycle / playerDutyCycle;
 		
-		if(servoPosition[0] == servoPosition[1]){
+		if((dutyCycleFactor >= 1 && dutyCycleFactor < 1.05) || (dutyCycleFactor <= .05) ){
 			HAL_RNG_GenerateRandomNumber(&hrng, &servo_pos);
 			servo_pos = servo_pos % 6;
-			moveServo(p->id, servo_pos);
+      
+      //Check for repeat positions
+      while(servo_pos == servoPosition[0]){
+        HAL_RNG_GenerateRandomNumber(&hrng, &servo_pos);
+        servo_pos = servo_pos % 6;
+      }
+      
+      moveServo(p->id, servo_pos);
 			score++;
-			USART_Printf("This is a hit for position %d\r\n", servo_pos);
+			USART_Printf("Servo Hit! Score is now %d\r\n", score);
 			USART_Printf("Servo is now at position %d\r\n", servo_pos);
+      roundStartTime = xTaskGetTickCount();
 		}
+    else if(xTaskGetTickCount() > roundStartTime + FIVE_SECONDS){
+      USART_Printf("Out of time! Score is still %d.\r\n", score);
+      HAL_RNG_GenerateRandomNumber(&hrng, &servo_pos);
+			servo_pos = servo_pos % 6;
+      
+      //Check for repeat positions
+      while(servo_pos == servoPosition[0]){
+       HAL_RNG_GenerateRandomNumber(&hrng, &servo_pos);
+			servo_pos = servo_pos % 6;
+      }
+      
+			moveServo(p->id, servo_pos);
+      USART_Printf("Servo is now at position %d\r\n", servo_pos);
+      roundStartTime = xTaskGetTickCount();
+    }
 		
 		
 		
@@ -173,32 +203,10 @@ void player_servo_task(void * parameters){
 	for(;;){
 	
 		int32_t angle = gyro_angle[1];
-		
-		if(angle > POS_0 - POS_MAX * .05 && angle < POS_0 + POS_MAX * .05){
-			moveServo(p->id, 0);
-			USART_Printf("Player servo in position %d\r\n", servoPosition[p->id]);
-		}
-		if(angle > POS_1 - POS_MAX * .05 && angle < POS_1 + POS_MAX * .05){
-			moveServo(p->id, 1);
-			USART_Printf("Player servo in position %d\r\n", servoPosition[p->id]);
-		}
-		if(angle > POS_2 - POS_MAX * .05 && angle < POS_2 + POS_MAX * .05){
-			moveServo(p->id, 2);
-			USART_Printf("Player servo in position %d\r\n", servoPosition[p->id]);
-		}
-		if(angle > POS_3 - POS_MAX * .05 && angle < POS_3 + POS_MAX * .05){
-			moveServo(p->id, 3);
-			USART_Printf("Player servo in position %d\r\n", servoPosition[p->id]);
-		}
-		if(angle > POS_4 - POS_MAX * .05 && angle < POS_4 + POS_MAX * .05){
-			moveServo(p->id, 4);
-			USART_Printf("Player servo in position %d\r\n", servoPosition[p->id]);
-		}
-		if(angle > POS_5 - POS_MAX * .05 && angle < POS_5 + POS_MAX * .05){
-			moveServo(p->id, 5);
-			USART_Printf("Player servo in position %d\r\n", servoPosition[p->id]);
-		}
-		
+    
+    float pos = (float) angle/POS_1;
+    setDuty(1, pos);
+
 		vTaskDelay(20);
 	}
 }

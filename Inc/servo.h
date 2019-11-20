@@ -2,12 +2,9 @@
 #include "cmsis_os.h"
 
 #define POS_0 (0)
-#define POS_1 (60)
-#define POS_2 (150)
-#define POS_3 (230)
-#define POS_4 (270)
-#define POS_5 (340)
-#define POS_MAX (400)
+#define POS_1 (45)
+#define FIVE_SECONDS (5000)
+
 
 void moveServoRight(int servo, int amount);
 void moveServoLeft(int servo, int amount);

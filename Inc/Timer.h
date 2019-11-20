@@ -7,3 +7,4 @@ void setDuty(int channel, float duty);
 void initTIM3();
 int getTIM3_TIF();
 void resetTIM3_TIF();
+uint32_t getDutyCycle(uint8_t servo);
